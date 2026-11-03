@@ -1,4 +1,6 @@
 [imgs, labels] = readMNIST('train-images-idx3-ubyte','train-labels-idx1-ubyte',5000,0);
+function [extract_rows, extract_cols] = extractor(target_matrix, target_rows, target_cols, ) 
+
 [num_rows, num_cols, total_images] = size(imgs);
 matrix_count = zeros(20,20);
 for n=1:total_images
@@ -30,7 +32,7 @@ end
 
 disp(size(accepted))
 M = size(accepted, 1); 
-A = zeros(5000,width(accepted)+1);
+A = zeros(5000, M+1);
 
 
 A(:,1) = 1;
@@ -50,12 +52,16 @@ theta = zeros(size(y));
 theta = A \ y;
 
 
-plot(theta())
+theta0 = theta(1);
+T = zeros(20,20);
+for k = 1:M
+    T(accepted(k,1), accepted(k,2)) = theta(k+1);
+end
+imagesc(T); colorbar; axis image;
 
 
 
-            
-
+[imgs_test, labels_test] = readMNIST('t10k-images-idx3-ubyte','t10k-labels-idx1-ubyte',5000,0);
 
 
 

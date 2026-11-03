@@ -1,6 +1,7 @@
 [imgs, labels] = readMNIST('train-images-idx3-ubyte','train-labels-idx1-ubyte',5000,0);
+function [matrix_count, accepted] = extractor(imgs) 
 [num_rows, num_cols, total_images] = size(imgs);
-matrix_count = zeros(20,20);
+matrix_count = zeros(width(imgs),height(imgs));
 for n=1:total_images
     for i=1:num_rows
         for j=1:num_cols
@@ -19,6 +20,8 @@ for i=1:count_rows
         end
     end
 end
+end
+
 y = zeros(length(labels),1);
 
 for i=1:length(labels)
@@ -59,8 +62,9 @@ imagesc(T); colorbar; axis image;
 
 
 
+[imgs_test, labels_test] = readMNIST('t10k-images-idx3-ubyte','t10k-labels-idx1-ubyte',5000,0);
 
-
+[test_matrixcount, test_accepted] = extractor(imgs_test);
 
 
              
