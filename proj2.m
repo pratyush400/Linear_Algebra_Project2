@@ -14,22 +14,22 @@ y_minus_sample = 0;
 y_plus_sample = 0;
 neg_y = 0;
 for k=1:length(y_test)
-    if y_pred == 1
-        y_plus_sample = y_plus_sample + 1;
-    if y_test(k) == -1 
-        pos_y = pos_y +1 ;
-    end
-    end
-    if y_pred == -1
-        y_minus_sample = y_minus_sample + 1;
     if y_test(k) == 1
-        neg_y = neg_y + 1;
+        y_plus_sample = y_plus_sample + 1;
+        if y_pred(k) == -1
+            neg_y = neg_y + 1;
+        end
     end
+    if y_test(k) == -1
+        y_minus_sample = y_minus_sample + 1;
+        if y_pred(k) == 1
+            pos_y = pos_y + 1;
+        end
     end
 end
-    false_pos_rate = pos_y/length(y_pred);
-    false_neg_rate = neg_y/length(y_pred);
-fprintf('Test error: %.2f%%\n', 100*test_error);
+    false_pos_rate = pos_y/y_minus_sample;
+    false_neg_rate = neg_y/y_plus_sample;
+    % fprintf('%3.f', pos_y+neg_y);
 
 
 function [matrix_count, accepted] = extractor(imgs)
@@ -75,5 +75,6 @@ T = zeros(num_rows, num_cols);
 for k = 1:M
     T(accepted(k,1), accepted(k,2)) = theta(k+1);
 end
+fprintf('θ₀: %.3f \n', theta(1));
 figure; imagesc(T); colorbar; axis image;
 end
