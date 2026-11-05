@@ -2,15 +2,49 @@
     [matrix_count, accepted] = extractor(imgs);
     [y_train, A_train] = design_matrix_builder(imgs, labels, accepted);
     [theta_train, T_train] = least_squares(y_train, A_train, accepted, size(imgs,1), size(imgs,2));
-    
+    title('\theta weights, 5000 training images');
     [imgs_test, labels_test] = readMNIST('t10k-images-idx3-ubyte','t10k-labels-idx1-ubyte',5000,0);
-    [y_test, A_test] = design_matrix_builder(imgs_test, labels_test, accepted);  
-        
+    [y_test, A_test] = design_matrix_builder(imgs_test, labels_test, accepted);      
     [y_pred, test_error] = compute_error(A_test, theta_train, y_test);
-    fprintf('Test error: %.2f%%\n', 100 * test_error);
-
-    [false_pos_rate, false_neg_rate, pos_y, neg_y, y_minus_sample, y_plus_sample] = compute_fpnr(y_test, y_pred)
+    fprintf('5000 sample test error: %.2f%%\n', 100 * test_error);
+    [false_pos_rate, false_neg_rate, pos_y, neg_y, y_minus_sample, y_plus_sample] = compute_fpnr(y_test, y_pred);
     
+    fprintf('theta_0: %.4f\n', theta_train(1));
+    fprintf('A: %d x %d, y: %d x 1\n', size(A_train,1), size(A_train,2), size(y_train,1));
+    fprintf('M0 = %d, M0+1 = %d (must be < 400 for the 400-image run)\n', size(accepted,1), size(accepted,1)+1);
+
+    [imgs400, labels400] = readMNIST('train-images-idx3-ubyte','train-labels-idx1-ubyte',400,0);
+    [y_train400, A_train400] = design_matrix_builder(imgs400, labels400, accepted);
+    [theta_train400, T_train400] = least_squares(y_train400, A_train400, accepted, size(imgs400,1), size(imgs400,2));
+    title('\theta weights, 400 training images');
+    [y_pred400, test_error400] = compute_error(A_test, theta_train400, y_test);
+    [fpr400, fnr400] = compute_fpnr(y_test, y_pred400);
+    
+    fprintf('5000 train: err %.2f%%, FPR %.2f%%, FNR %.2f%%\n', 100*test_error, 100*false_pos_rate, 100*false_neg_rate);
+    fprintf(' 400 train: err %.2f%%, FPR %.2f%%, FNR %.2f%%\n', 100*test_error400, 100*fpr400, 100*fnr400);
+
+    M1 = 100;
+    [F_train_100, F_test_100, R] = random_feature_map(A_train, A_test, M1);
+
+    rand_list = [10, 20, 50, 100, 1000, 1500, 2000, 3000, 4000, 4500, 4600, 4700, 4800, 4900];
+    test_errs = zeros(size(rand_list));
+    
+    for k = 1:length(rand_list)
+        M1 = rand_list(k);
+        [F_train, F_test, R] = random_feature_map(A_train, A_test, M1);
+        A_new_train = [ones(size(F_train,1),1), F_train];
+        A_new_test  = [ones(size(F_test,1),1),  F_test];
+        theta_new = A_new_train \ y_train;
+        [y_pred_new, test_errs(k)] = compute_error(A_new_test, theta_new, y_test);
+        [fprs(k), fnrs(k)] = compute_fpnr(y_test, y_pred_new);
+        fprintf('M1 = %4d: err %.2f%%, FPR %.2f%%, FNR %.2f%%\n', M1, 100*test_errs(k), 100*fprs(k), 100*fnrs(k));
+    end
+
+    figure; semilogx(rand_list, 100*test_errs, '-o');  title('Test error vs. number of random features'); grid on;
+    xlabel('M_1'); ylabel('Test error rate (%)');
+
+    %---functions---%
+
     function [matrix_count, accepted] = extractor(imgs)
     [num_rows, num_cols, total_images] = size(imgs);
     matrix_count = zeros(num_rows, num_cols);
@@ -54,7 +88,7 @@
     for k = 1:M
         T(accepted(k,1), accepted(k,2)) = theta(k+1);
     end
-    fprintf('θ₀: %.3f \n', theta(1));
+    %fprintf('θ₀: %.3f \n', theta(1));
     figure; imagesc(T); colorbar; axis image;
     end
     
@@ -86,4 +120,17 @@
     false_pos_rate = pos_y/y_minus_sample;
     false_neg_rate = neg_y/y_plus_sample;
     % fprintf('%3.f', pos_y+neg_y);
+    end
+
+    function[F_train, F_test, R] = random_feature_map(A_train, A_test, M1)
+    M0 = size(A_train, 2) - 1;
+    rng(15);
+
+    R = sign(randn(M1, M0));
+
+    x_train = A_train(:,2:end);
+    x_test = A_test(:, 2:end);
+
+    F_train = max(x_train * R', 0);
+    F_test = max(x_test * R', 0);
     end
