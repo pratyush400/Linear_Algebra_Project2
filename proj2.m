@@ -21,6 +21,7 @@
     fprintf('5000 sample test error: %.2f%%\n', 100 * test_error);
     [false_pos_rate, false_neg_rate, pos_y, neg_y, y_minus_sample, y_plus_sample] = compute_fpnr(y_test, y_pred);
     fprintf('theta_0: %.4f\n', theta_train(1));
+    fprintf('falsepos: %.4f\n falseneg: %.4f\n',false_pos_rate, false_neg_rate )
     fprintf('A: %d x %d, y: %d x 1\n', size(A_train,1), size(A_train,2), size(y_train,1));
     fprintf('M0 = %d, M0+1 = %d (must be < 400 for the 400-image run)\n', size(accepted,1), size(accepted,1)+1);
 
@@ -134,9 +135,9 @@
             end
         end
     end
-    false_pos_rate = pos_y/y_minus_sample;
-    false_neg_rate = neg_y/y_plus_sample;
-    % fprintf('%3.f', pos_y+neg_y);
+    false_pos_rate = pos_y/y_minus_sample * 100;
+    false_neg_rate = neg_y/y_plus_sample * 100;
+    %fprintf('%3.f', pos_y+neg_y);
     end
 
     function[F_train, F_test, R] = random_feature_map(A_train, A_test, M1) %random feature generator
