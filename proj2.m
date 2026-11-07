@@ -22,9 +22,9 @@
     fprintf('5000 sample test error: %.2f%%\n', 100 * test_error);
     [false_pos_rate, false_neg_rate, pos_y, neg_y, y_minus_sample, y_plus_sample] = compute_fpnr(y_test, y_pred);
     fprintf('theta_0: %.4f\n', theta_train(1));
-    fprintf('falsepos: %.4f%\n falseneg: %.4f%\n',false_pos_rate, false_neg_rate )
-    fprintf('A: %d x %d, y: %d x 1\n', size(A_train,1), size(A_train,2), size(y_train,1));
-    fprintf('M0 = %d, M0+1 = %d (must be < 400 for the 400-image run)\n', size(accepted,1), size(accepted,1)+1);
+    %fprintf('falsepos: %.4f%\n falseneg: %.4f%\n',false_pos_rate, false_neg_rate )
+    %fprintf('A: %d x %d, y: %d x 1\n', size(A_train,1), size(A_train,2), size(y_train,1));
+    %fprintf('M0 = %d, M0+1 = %d (must be < 400 for the 400-image run)\n', size(accepted,1), size(accepted,1)+1);
 
     %--- Question 5
 
